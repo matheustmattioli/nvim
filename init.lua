@@ -59,6 +59,11 @@ Plug('hrsh7th/nvim-cmp')
 Plug('hrsh7th/cmp-vsnip')
 Plug('hrsh7th/vim-vsnip')
 
+
+-- Remote Acess
+Plug('nvim-lua/plenary.nvim') -- dependency for remote sshfs
+Plug('NOSDuco/remote-sshfs.nvim') -- remote sshfs
+
 vim.call('plug#end')
 
 -- move config and plugin config to alternate files
@@ -91,6 +96,7 @@ require("plugins.snacks")
 require("plugins.gitsigns")
 require("plugins.copilot")
 require("plugins.cmp")
+require("plugins.sshfs")
 
 vim.defer_fn(function() 
 		--defer non-essential configs,

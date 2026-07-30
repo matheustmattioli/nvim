@@ -162,3 +162,8 @@ map('n', '<leader>hq', gitsigns.setqflist)
 -- Gitsigns Toggles
 map('n', '<leader>tb', gitsigns.toggle_current_line_blame)
 map('n', '<leader>tw', gitsigns.toggle_word_diff)
+
+
+-- sshfs
+map('n', '<leader>rc', function() require('remote-sshfs.api').connect() end)
+map('n', '<leader>rd', function() require('remote-sshfs.api').disconnect() end)
