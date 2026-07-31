@@ -59,6 +59,8 @@ Plug('hrsh7th/nvim-cmp')
 Plug('hrsh7th/cmp-vsnip')
 Plug('hrsh7th/vim-vsnip')
 
+-- Python Selector
+Plug('linux-cultist/venv-selector.nvim')
 
 -- Remote Acess
 Plug('nvim-lua/plenary.nvim') -- dependency for remote sshfs
@@ -97,6 +99,7 @@ require("plugins.gitsigns")
 require("plugins.copilot")
 require("plugins.cmp")
 require("plugins.sshfs")
+require("plugins.venv-selector")
 
 vim.defer_fn(function() 
 		--defer non-essential configs,
