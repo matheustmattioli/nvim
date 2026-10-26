@@ -1,26 +1,19 @@
--- snacks.nvim: ui toolkit
+-- disabled on purpose: dashboard (alpha), explorer (nvim-tree), image (unsupported in Windows Terminal)
 
 require("snacks").setup({
 	input = {
-		enabled = true, -- nicer floating input for opencode.ask()
+		enabled = true,
 		win = {
-			backdrop = false, 
+			backdrop = false,
 			border = "rounded",
 		},
 	},
-    picker = {
-        enabled = true,
-    },
-    bufdelete = {
-        enabled = true,
-    },
-    notifier = {
-        enabled = true,
-    },
-    lazygit = {
-        enabled = true,
-    },
-    scroll = {
-        enabled = true,
-    },
+	picker = { enabled = true },
+	bufdelete = { enabled = true },
+	notifier = { enabled = true },
+	lazygit = { enabled = true },
+	scroll = { enabled = true },
+	bigfile = { enabled = true },
+	quickfile = { enabled = true },
+	words = { enabled = true },
 })

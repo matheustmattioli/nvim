@@ -1,165 +1,198 @@
--- mappings, including plugins
+-- Group names (<leader>f = find, ...) are defined in lua/plugins/which-key.lua.
 
-local function map(m, k, v, opts)
-	opts = opts or {}
-	opts.noremap = true
-	opts.silent = true
-	vim.keymap.set(m, k, v, opts)
+local function map(mode, lhs, rhs, desc, opts)
+	opts = vim.tbl_extend("force", { silent = true, desc = desc }, opts or {})
+	vim.keymap.set(mode, lhs, rhs, opts)
 end
 
--- set leader
-map("", "<Space>", "<Nop>")
+local function lazy(mod, fn, ...)
+	local args = { ... }
+	return function()
+		require(mod)[fn](unpack(args))
+	end
+end
+
+-- Leader ----------------------------------------------------------------------
+map("", "<Space>", "<Nop>", "leader")
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
--- buffers
-map("n", "<S-l>", ":bnext<CR>")
-map("n", "<S-h>", ":bprevious<CR>")
-map("n", "<leader>q", function() Snacks.bufdelete.delete() end)
-map("n", "<leader>Q", function() Snacks.bufdelete.delete({ force = true }) end)
-map("n", "<leader>U", function() Snacks.bufdelete.all() Snacks.bufdelete.invisible()  end) --close all
-map('n', '<leader>vs', ':vsplit<CR>:bnext<CR>') --ver split + open next buffer
+-- Top level (most used) -------------------------------------------------------
+map("n", "<leader>w", "<cmd>write<cr>", "write file")
+map("n", "<leader>q", function() Snacks.bufdelete.delete() end, "close buffer")
+map("n", "<leader>Q", function() Snacks.bufdelete.delete({ force = true }) end, "close buffer (discard changes)")
+map("n", "<leader>e", "<cmd>NvimTreeFindFileToggle<cr>", "file tree (at current file)")
+map("n", "<leader>R", "<cmd>source %<cr>", "source current file")
+map("n", "<leader>h", "<cmd>Alpha<cr>", "home (dashboard)")
+map("v", "<leader>i", "=gv", "re-indent selection")
 
--- buffer position nav + reorder
-map('n', '<AS-h>', '<Cmd>BufferMovePrevious<CR>')
-map('n', '<AS-l>', '<Cmd>BufferMoveNext<CR>')
-map('n', '<A-1>', '<Cmd>BufferGoto 1<CR>')
-map('n', '<A-2>', '<Cmd>BufferGoto 2<CR>')
-map('n', '<A-3>', '<Cmd>BufferGoto 3<CR>')
-map('n', '<A-4>', '<Cmd>BufferGoto 4<CR>')
-map('n', '<A-5>', '<Cmd>BufferGoto 5<CR>')
-map('n', '<A-6>', '<Cmd>BufferGoto 6<CR>')
-map('n', '<A-7>', '<Cmd>BufferGoto 7<CR>')
-map('n', '<A-8>', '<Cmd>BufferGoto 8<CR>')
-map('n', '<A-9>', '<Cmd>BufferGoto 9<CR>')
-map('n', '<A-0>', '<Cmd>BufferLast<CR>')
-map('n', '<A-p>', '<Cmd>BufferPin<CR>')
+-- Buffers: Shift-h/l cycle, Alt-1..9 jump, Alt-Shift-h/l move, Alt-p pin -------
+map("n", "<S-l>", "<cmd>bnext<cr>", "next buffer")
+map("n", "<S-h>", "<cmd>bprevious<cr>", "previous buffer")
+map("n", "<A-S-h>", "<cmd>BufferMovePrevious<cr>", "move buffer left")
+map("n", "<A-S-l>", "<cmd>BufferMoveNext<cr>", "move buffer right")
+for i = 1, 9 do
+	map("n", "<A-" .. i .. ">", "<cmd>BufferGoto " .. i .. "<cr>", "go to buffer " .. i)
+end
+map("n", "<A-0>", "<cmd>BufferLast<cr>", "go to last buffer")
+map("n", "<A-p>", "<cmd>BufferPin<cr>", "pin buffer")
 
--- windows - ctrl nav, fn resize
-map("n", "<C-h>", "<C-w>h")
-map("n", "<C-j>", "<C-w>j")
-map("n", "<C-k>", "<C-w>k")
-map("n", "<C-l>", "<C-w>l")
-map("n", "<F5>", ":resize +2<CR>")
-map("n", "<F6>", ":resize -2<CR>")
-map("n", "<F7>", ":vertical resize +2<CR>")
-map("n", "<F8>", ":vertical resize -2<CR>")
-
--- fzf and grep
-map("n", "<leader>f", ":lua require('fzf-lua').files()<CR>") --search cwd
-map("n", "<leader>Fh", ":lua require('fzf-lua').files({ cwd = '~/' })<CR>") --search home
-map("n", "<leader>Fc", ":lua require('fzf-lua').files({ cwd = '~/.config' })<CR>") --search .config
-map("n", "<leader>Fl", ":lua require('fzf-lua').files({ cwd = '~/.local/src' })<CR>") --search .local/src
-map("n", "<leader>Ff", ":lua require('fzf-lua').files({ cwd = '..' })<CR>") --search above
-map("n", "<leader>Fr", ":lua require('fzf-lua').resume()<CR>") --last search
-map("n", "<leader>g", ":lua require('fzf-lua').grep()<CR>") --grep
-map("n", "<leader>G", ":lua require('fzf-lua').grep_cword()<CR>") --grep word under cursor
-map("n", "/", function()
-    require("fzf-lua").blines({
-        winopts = {
-            height = 0.35,
-            width = 0.60,
-            row = 0.95,
-            border = "rounded",
-        },
-    })
-end)
-
--- misc
-map("n", "<leader>s", ":%s//g<Left><Left>") --replace all
-map("n", "<leader>sr", ":%s/<c-r><c-w>//gc<Left><Left><Left>")
-map("n", "<leader>t", ":NvimTreeFindFileToggle<CR>") --open file explorer at current file
--- map("n", "<leader>t", ":NvimTreeToggle<CR>") --open file explorer
-map("n", "<leader>p", switch_theme) --cycle themes
-map("n", "<leader>P", ":PlugInstall<CR>") --vim-plug
-map('n', '<leader>z', ":lua require('FTerm').open()<CR>") --open term
-map('t', '<Esc>', '<C-\\><C-n><CMD>lua require("FTerm").close()<CR>') --preserves session
-map("n", "<leader>w", ":w<CR>") --write but one less key
-map("n", "<leader>d", ":w ") --duplicate to new name
-map("n", "<leader>x", "<cmd>!chmod +x %<CR>") --make a file executable
-map("n", "<leader>mv", ":!mv % ") --move a file to a new dir
-map("n", "<leader>R", ":so %<CR>") --reload neovim config
-map("n", "<leader>u", ':silent !xdg-open "<cWORD>" &<CR>') --open a url under cursor
-map("v", "<leader>i", "=gv") --auto indent
-map("n", "<leader>W", ":set wrap!<CR>") --toggle wrap
-map("n", "<leader>l", ":Twilight<CR>") --surrounding dim
-
--- decisive csv
-map("n", "<leader>csa", ":lua require('decisive').align_csv({})<cr>")
-map("n", "<leader>csA", ":lua require('decisive').align_csv_clear({})<cr>")
-map("n", "[c", ":lua require('decisive').align_csv_prev_col()<cr>")
-map("n", "]c", ":lua require('decisive').align_csv_next_col()<cr>")
-
-
-map("n", "<leader>H", function() --toggle btop in term
-    _G.btop:toggle()
-end)
-
-
-map("n", "<leader>ma", function() --quick make in dir of buffer
-	local bufdir = vim.fn.expand("%:p:h")
-	vim.cmd("lcd " .. bufdir)
-	vim.cmd("!sudo make uninstall && sudo make clean install %")
-end)
-
-
-map("n", "<leader>nn", function() --toggle relative vs absolute line numbers
-	if vim.wo.relativenumber then
-		vim.wo.relativenumber = false
-		vim.wo.number = true
-	else
-		vim.wo.relativenumber = true
+local function rename_file()
+	local old = vim.api.nvim_buf_get_name(0)
+	if old == "" then
+		vim.notify("Buffer has no file", vim.log.levels.WARN)
+		return
 	end
-end)
+	vim.ui.input({ prompt = "Move/rename to: ", default = old, completion = "file" }, function(new)
+		if not new or new == "" or new == old then
+			return
+		end
+		vim.fn.mkdir(vim.fs.dirname(new), "p")
+		vim.cmd.saveas({ new, bang = true })
+		vim.fn.delete(old)
+		local old_buf = vim.fn.bufnr(old)
+		if old_buf > 0 then
+			vim.cmd.bwipeout(old_buf)
+		end
+	end)
+end
 
--- git
-map("n", "<leader>lg", function() Snacks.lazygit() end)
+map("n", "<leader>bd", function() Snacks.bufdelete.delete() end, "delete buffer")
+map("n", "<leader>bD", function() Snacks.bufdelete.delete({ force = true }) end, "delete buffer (discard changes)")
+map("n", "<leader>bo", function() Snacks.bufdelete.other() end, "close other buffers")
+map("n", "<leader>ba", function() Snacks.bufdelete.all() end, "close all buffers")
+map("n", "<leader>bv", "<cmd>vsplit | bnext<cr>", "vsplit + next buffer")
+map("n", "<leader>bs", ":saveas ", "save as (copy to new name)", { silent = false })
+map("n", "<leader>bm", rename_file, "move / rename file")
 
-local gitsigns = require('gitsigns')
-map('n', ']c', function()
-      if vim.wo.diff then
-        vim.cmd.normal({']c', bang = true})
-      else
-        gitsigns.nav_hunk('next')
-      end
-end)
-map('n', '[c', function()
-      if vim.wo.diff then
-        vim.cmd.normal({'[c', bang = true})
-      else
-        gitsigns.nav_hunk('prev')
-      end
-end)
-map('n', '<leader>hs', gitsigns.stage_hunk)
-map('n', '<leader>hr', gitsigns.reset_hunk)
+-- Windows: Ctrl-hjkl move, F5-F8 resize ----------------------------------------
+map("n", "<C-h>", "<C-w>h", "window left")
+map("n", "<C-j>", "<C-w>j", "window down")
+map("n", "<C-k>", "<C-w>k", "window up")
+map("n", "<C-l>", "<C-w>l", "window right")
+map("n", "<F5>", "<cmd>resize +2<cr>", "taller window")
+map("n", "<F6>", "<cmd>resize -2<cr>", "shorter window")
+map("n", "<F7>", "<cmd>vertical resize +2<cr>", "wider window")
+map("n", "<F8>", "<cmd>vertical resize -2<cr>", "narrower window")
 
-map('v', '<leader>hs', function()
-  gitsigns.stage_hunk({ vim.fn.line('.'), vim.fn.line('v') })
-end)
+-- Find (fzf-lua) ---------------------------------------------------------------
+local config_dir = vim.fn.stdpath("config")
+map("n", "<leader>ff", lazy("fzf-lua", "files"), "files (cwd)")
+map("n", "<leader>fh", lazy("fzf-lua", "files", { cwd = "~" }), "files (home)")
+map("n", "<leader>fc", lazy("fzf-lua", "files", { cwd = config_dir }), "files (nvim config)")
+map("n", "<leader>fp", lazy("fzf-lua", "files", { cwd = ".." }), "files (parent dir)")
+map("n", "<leader>fo", lazy("fzf-lua", "oldfiles"), "recent files")
+map("n", "<leader>fb", lazy("fzf-lua", "buffers"), "open buffers")
+map("n", "<leader>fg", lazy("fzf-lua", "live_grep"), "grep (live)")
+map("n", "<leader>fw", lazy("fzf-lua", "grep_cword"), "grep word under cursor")
+map("n", "<leader>fr", lazy("fzf-lua", "resume"), "resume last search")
+map("n", "<leader>fk", lazy("fzf-lua", "keymaps"), "keymaps")
+map("n", "<leader>/", function()
+	require("fzf-lua").blines({
+		winopts = { height = 0.35, width = 0.60, row = 0.95, border = "rounded" },
+	})
+end, "fuzzy search in buffer")
 
-map('v', '<leader>hr', function()
-  gitsigns.reset_hunk({ vim.fn.line('.'), vim.fn.line('v') })
-end)
+-- Search: native "/" and "?" (regex, motions like d/foo, n/N, cgn + .) ---------
+-- <Esc> clears the highlight. Neovim's default for this is <C-l>,
+-- but here <C-l> moves to the right window.
+map("n", "<Esc>", "<cmd>nohlsearch<cr><Esc>", "clear search highlight")
+map("n", "n", "nzzzv", "next match (centered)")
+map("n", "N", "Nzzzv", "previous match (centered)")
 
-map('n', '<leader>hS', gitsigns.stage_buffer)
-map('n', '<leader>hR', gitsigns.reset_buffer)
-map('n', '<leader>hp', gitsigns.preview_hunk)
-map('n', '<leader>hi', gitsigns.preview_hunk_inline)
+-- Git (gitsigns + lazygit); ]h / [h jump between hunks -------------------------
+local function hunk_jump(direction)
+	return function()
+		if vim.wo.diff then
+			vim.cmd.normal({ direction == "next" and "]c" or "[c", bang = true })
+		else
+			require("gitsigns").nav_hunk(direction)
+		end
+	end
+end
 
-map('n', '<leader>hb', function()
-  gitsigns.blame_line({ full = true })
-end)
+local function visual_range()
+	return { vim.fn.line("."), vim.fn.line("v") }
+end
 
-map('n', '<leader>hd', gitsigns.diffthis)
+map("n", "]h", hunk_jump("next"), "next git hunk")
+map("n", "[h", hunk_jump("prev"), "previous git hunk")
+map("n", "<leader>gg", function() Snacks.lazygit() end, "lazygit")
+map("n", "<leader>gs", lazy("gitsigns", "stage_hunk"), "stage hunk")
+map("n", "<leader>gr", lazy("gitsigns", "reset_hunk"), "reset hunk")
+map("v", "<leader>gs", function() require("gitsigns").stage_hunk(visual_range()) end, "stage selected lines")
+map("v", "<leader>gr", function() require("gitsigns").reset_hunk(visual_range()) end, "reset selected lines")
+map("n", "<leader>gS", lazy("gitsigns", "stage_buffer"), "stage file")
+map("n", "<leader>gR", lazy("gitsigns", "reset_buffer"), "reset file")
+map("n", "<leader>gp", lazy("gitsigns", "preview_hunk"), "preview hunk")
+map("n", "<leader>gi", lazy("gitsigns", "preview_hunk_inline"), "preview hunk inline")
+map("n", "<leader>gb", lazy("gitsigns", "blame_line", { full = true }), "blame line")
+map("n", "<leader>gd", lazy("gitsigns", "diffthis"), "diff vs index")
+map("n", "<leader>gD", lazy("gitsigns", "diffthis", "~"), "diff vs last commit")
+map("n", "<leader>gq", lazy("gitsigns", "setqflist"), "hunks to quickfix (file)")
+map("n", "<leader>gQ", lazy("gitsigns", "setqflist", "all"), "hunks to quickfix (repo)")
 
-map('n', '<leader>hD', function()
-  gitsigns.diffthis('~')
-end)
+-- Code (LSP keys are added in lsp.lua when a server attaches) ----------------
+map({ "n", "x" }, "<leader>cf", function() require("conform").format({ async = true }) end, "format file/selection")
 
-map('n', '<leader>hQ', function() gitsigns.setqflist('all') end)
-map('n', '<leader>hq', gitsigns.setqflist)
+-- Python ------------------------------------------------------------------------
+map("n", "<leader>pv", "<cmd>VenvSelect<cr>", "select venv")
+map("n", "<leader>pd", lazy("neogen", "generate"), "generate docstring")
 
-map('n', '<leader>rc', function() require('remote-sshfs.api').connect() end)
-map('n', '<leader>rd', function() require('remote-sshfs.api').disconnect() end)
+-- Remote (SSHFS-Win, see plugins/sshfs.lua) ------------------------------------
+map("n", "<leader>rc", "<cmd>SshfsConnect<cr>", "connect (mount server)")
+map("n", "<leader>rd", "<cmd>SshfsDisconnect<cr>", "disconnect")
+map("n", "<leader>rs", "<cmd>SshfsStatus<cr>", "status")
 
-map('n', '<leader>pv', "<cmd>VenvSelect<cr>")
+-- Substitute: cursor ends inside the pattern, ready to type ---------------------
+map("n", "<leader>ss", ":%s//g<Left><Left>", "substitute in file", { silent = false })
+map("n", "<leader>sw", ":%s/<C-r><C-w>//gc<Left><Left><Left>", "substitute word under cursor", { silent = false })
+
+-- Terminal (FTerm) ---------------------------------------------------------------
+map("n", "<leader>tt", lazy("FTerm", "toggle"), "floating terminal")
+map("n", "<leader>tb", function() _G.btop:toggle() end, "btop")
+
+-- <Esc> hides the floating terminal, only inside FTerm buffers
+vim.api.nvim_create_autocmd("FileType", {
+	group = vim.api.nvim_create_augroup("user_fterm_keys", { clear = true }),
+	pattern = { "FTerm", "fterm_btop" },
+	callback = function(args)
+		local close = args.match == "FTerm"
+			and function() require("FTerm").close() end
+			or function() _G.btop:close() end
+		map("t", "<Esc>", close, "hide terminal", { buffer = args.buf })
+	end,
+})
+
+-- UI toggles ---------------------------------------------------------------------
+map("n", "<leader>ut", function() _G.switch_theme() end, "cycle theme")
+map("n", "<leader>uw", "<cmd>set wrap!<cr>", "toggle wrap")
+map("n", "<leader>ud", "<cmd>Twilight<cr>", "toggle dim (twilight)")
+map("n", "<leader>un", function()
+	vim.wo.relativenumber = not vim.wo.relativenumber
+	vim.wo.number = true
+end, "toggle relative numbers")
+
+-- Plugins (vim-plug) -------------------------------------------------------------
+map("n", "<leader>Pi", "<cmd>PlugInstall<cr>", "install")
+map("n", "<leader>Pu", "<cmd>PlugUpdate<cr>", "update")
+map("n", "<leader>Pc", "<cmd>PlugClean<cr>", "clean (remove unused)")
+
+-- CSV (decisive.nvim): only in csv buffers, so ]c/[c keep their normal meaning elsewhere
+vim.api.nvim_create_autocmd("FileType", {
+	group = vim.api.nvim_create_augroup("user_csv_keys", { clear = true }),
+	pattern = "csv",
+	callback = function(args)
+		local o = { buffer = args.buf }
+		map("n", "<leader>Ca", lazy("decisive", "align_csv", {}), "align columns", o)
+		map("n", "<leader>Cc", lazy("decisive", "align_csv_clear", {}), "clear alignment", o)
+		map("n", "]c", lazy("decisive", "align_csv_next_col"), "next csv column", o)
+		map("n", "[c", lazy("decisive", "align_csv_prev_col"), "previous csv column", o)
+	end,
+})
+
+-- Comments: Ctrl-/ (terminals send it as <C-_>) --------------------------------
+for _, key in ipairs({ "<C-/>", "<C-_>" }) do
+	map("n", key, "gcc", "toggle comment", { remap = true })
+	map("v", key, "gc", "toggle comment", { remap = true })
+end

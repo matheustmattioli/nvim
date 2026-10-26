@@ -34,7 +34,7 @@ local branch = {
 local progress = function()
 	local current_line = vim.fn.line(".")
 	local total_lines = vim.fn.line("$")
-	local chars = { "", "", "" } --adding more chars will still work
+	local chars = { "", "", "" }
 	local line_ratio = current_line / total_lines
 	local index = math.ceil(line_ratio * #chars)
 	return chars[index] .. " " .. math.floor(line_ratio * 100) .. "%%"
@@ -61,8 +61,3 @@ sections = {
 	extensions = { 'nvim-tree' },
 })
 
--- transparency override if using old pywal, shouldn't be needed with 16
--- vim.api.nvim_set_hl(0, "lualine_c_normal", { bg = "none" })
--- vim.api.nvim_set_hl(0, "lualine_c_inactive", { bg = "none" })
--- vim.api.nvim_set_hl(0, "lualine_x_normal", { bg = "none" })
--- vim.api.nvim_set_hl(0, "lualine_x_inactive", { bg = "none" })

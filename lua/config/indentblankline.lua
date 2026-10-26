@@ -1,10 +1,8 @@
 require("ibl").setup({
-
     indent = {
-        char = "▏", -- slightly thinner
+        char = "▏",
         smart_indent_cap = true,     },
     
-    -- highlights the block of code you are currently in
     scope = {
         enabled = true,
         show_start = true,   

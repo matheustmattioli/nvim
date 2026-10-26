@@ -1,6 +1,4 @@
 -- theme choice is saved in a file for persistence on restart
--- could use a plugin instead, but hey, this is more fun
--- lualine theme gets stored separately due to possible naming differences
 
 local theme_file = vim.fn.stdpath("config") .. "/lua/config/saved_theme"
 
@@ -16,7 +14,7 @@ local themes = { --add more themes here, if installed
 	{ "catppuccin", "auto" },
 	{ "gruvbox", "gruvbox" },
 	{ "night-owl", "night-owl" },
-    { "caelestia", "caelestia" },
+	{ "pywal16", "pywal16-nvim" }
 }
 
 local current_theme_index = 1

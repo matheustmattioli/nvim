@@ -1,5 +1,3 @@
---useful stuff
-
 -- close nvim-tree if it's last buffer open
 vim.api.nvim_create_autocmd("BufEnter", {
 	pattern = "*",
@@ -21,23 +19,18 @@ end
 end,
 })
 
-
 -- linting when file is written to
 vim.api.nvim_create_autocmd("BufWritePost", {
   callback = function()
-    -- try_lint without arguments runs the linters defined in `linters_by_ft`
-    -- for the current filetype, on write
     require("lint").try_lint()
   end,
 })
-
 
 -- spellcheck in md
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = "markdown",
 	command = "setlocal spell wrap",
 })
-
 
 -- disable automatic comment on newline
 vim.api.nvim_create_autocmd("FileType", {
@@ -47,7 +40,6 @@ vim.api.nvim_create_autocmd("FileType", {
 		end,
 })
 
-
 -- highlight text on yank
 vim.api.nvim_create_autocmd("TextYankPost", {
 	pattern = "*",
@@ -56,13 +48,11 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 	end,
 })
 
-
 -- reload files on external change
 vim.api.nvim_create_autocmd("FocusGained", {
 pattern = "*",
 command = "checktime",
 })
-
 
 -- restore cursor pos on file open
 vim.api.nvim_create_autocmd("BufReadPost", {
@@ -101,6 +91,12 @@ vim.api.nvim_create_autocmd("BufDelete", {
     end,
 })
 
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = "*",
+  callback = function(args)
+    require("conform").format({ bufnr = args.buf })
+  end,
+})
 
 vim.api.nvim_create_autocmd({ "BufEnter", "FocusGained", "InsertLeave", "CmdlineLeave", "WinEnter" }, {
    pattern = "*",
@@ -118,7 +114,6 @@ vim.api.nvim_create_autocmd({ "BufLeave", "FocusLost", "InsertEnter", "CmdlineEn
    callback = function()
       if vim.o.nu then
          vim.opt.relativenumber = false
-         -- Conditional taken from https://github.com/rockyzhang24/dotfiles/commit/03dd14b5d43f812661b88c4660c03d714132abcf
          -- Workaround for https://github.com/neovim/neovim/issues/32068
          if not vim.tbl_contains({"@", "-"}, vim.v.event.cmdtype) then
             vim.cmd "redraw"

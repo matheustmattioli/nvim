@@ -1,16 +1,39 @@
-require('lint').linters_by_ft = { --some of these need to be installed from package manager
-  lua = {'luac'},
-  python = {'ruff'},
-  sh = {'bash'},
-  c = {'cppcheck'},
-  rust = {'clippy'},
-  css = {'stylelint'},
-  html = {'htmlhint'},
+-- python is linted by the ruff LSP (lsp.lua), not here
+local lint = require("lint")
+
+local wanted = {
+	lua = { "luac" },
+	sh = { "bash" },
+	c = { "cppcheck" },
+	rust = { "clippy" },
+	css = { "stylelint" },
+	html = { "htmlhint" },
 }
 
--- Some linters require a file to be saved to disk, others support linting stdin input.
--- For such linters you could also define a more aggressive autocmd,
--- for example on the InsertLeave or TextChanged events.
--- To get the filetype of a buffer you can run := vim.bo.filetype.
+local function linter_cmd(name)
+	local linter = lint.linters[name]
+	if type(linter) == "function" then
+		linter = linter()
+	end
+	if type(linter) ~= "table" then
+		return nil
+	end
+	local cmd = linter.cmd
+	if type(cmd) == "function" then
+		cmd = cmd()
+	end
+	return cmd
+end
 
--- lints on close, see autocmd
+-- keep only installed linters, so saving a file never shows "ENOENT" errors
+local available = {}
+for ft, names in pairs(wanted) do
+	for _, name in ipairs(names) do
+		local cmd = linter_cmd(name)
+		if cmd and vim.fn.executable(cmd) == 1 then
+			available[ft] = available[ft] or {}
+			table.insert(available[ft], name)
+		end
+	end
+end
+lint.linters_by_ft = available
